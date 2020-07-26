@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 
 void main() {
-  runApp(new MaterialApp(home: new ExampleWidget()));
+  runApp(
+      Phoenix(
+          child: new MaterialApp(home: new ExampleWidget()),
+      )
+  );
 }
 
 class ExampleWidget extends StatefulWidget {
@@ -83,7 +88,7 @@ class SpinnerButton extends StatelessWidget {
           shape: BoxShape.circle,
         ),
         child: new Icon(
-          Icons.arrow_upward,
+          Icons.restore,
           color: Colors.blue,
         ),
       ),
@@ -91,10 +96,11 @@ class SpinnerButton extends StatelessWidget {
   }
 }
 
-class ExampleWidgetState extends State<ExampleWidget> with SingleTickerProviderStateMixin {
+class ExampleWidgetState extends State<ExampleWidget> with TickerProviderStateMixin {
   AnimationController _controller;
-  List<bool> seatButtonsSelected;
-  List<bool> visibilities;
+  List<bool> _seatButtonsSelected;
+  List<bool> _visibilities;
+  bool _spinOrReset;
 
   @override
   void initState() {
@@ -103,12 +109,13 @@ class ExampleWidgetState extends State<ExampleWidget> with SingleTickerProviderS
       vsync: this,
     );
 
-    seatButtonsSelected = List<bool>();
-    visibilities = List<bool>();
+    _seatButtonsSelected = List<bool>();
+    _visibilities = List<bool>();
     for ( var i = 0 ; i < widget.numSeats; i++ ) {
-      seatButtonsSelected.add(false);
-      visibilities.add(true);
+      _seatButtonsSelected.add(false);
+      _visibilities.add(true);
     }
+    _spinOrReset = true;
 
     super.initState();
   }
@@ -120,13 +127,12 @@ class ExampleWidgetState extends State<ExampleWidget> with SingleTickerProviderS
   }
 
   void spin() {
-
     setState(() {
-      visibilities = seatButtonsSelected;
+      _visibilities = _seatButtonsSelected;
     });
-
     _controller.reset();
     _controller.forward();
+    _spinOrReset = false;
   }
 
   @override
@@ -148,7 +154,13 @@ class ExampleWidgetState extends State<ExampleWidget> with SingleTickerProviderS
             new Positioned(
               child: RotationTransition(
                 turns: Tween(begin: 0.0, end: 2.0).animate(_controller),
-                child: new SpinnerButton(onTap: () => spin()),
+                child: new SpinnerButton(onTap: () {
+                  if (_spinOrReset) {
+                    spin();
+                  } else {
+                    Phoenix.rebirth(context);
+                  }
+                }),
               ),
               top: 120.0,
               left: 130.0,
@@ -156,17 +168,16 @@ class ExampleWidgetState extends State<ExampleWidget> with SingleTickerProviderS
             for ( var i = 0 ; i < widget.numSeats; i++ )
               Positioned (
                 child: Visibility (
-                  visible: visibilities[i],
+                  visible: _visibilities[i],
                   child: new CircleButton (
                   initialColor: Colors.black,
                     iconData: Icons.golf_course,
-                    onTapCallback: (bool selected){ seatButtonsSelected[i] = selected;},
+                    onTapCallback: (bool selected){ _seatButtonsSelected[i] = selected;},
                   ),
                 ),
                 top: sin(2.0 * pi * i.toDouble()/widget.numSeats.toDouble()) * 118 + 125,
                 left: cos(2.0 * pi * i.toDouble()/widget.numSeats.toDouble()) * 118 + 125,
               )
-
           ],
         ),
       ),
