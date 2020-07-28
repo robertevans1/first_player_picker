@@ -88,7 +88,7 @@ class SpinnerButton extends StatelessWidget {
           shape: BoxShape.circle,
         ),
         child: new Icon(
-          Icons.restore,
+          Icons.arrow_upward,
           color: Colors.blue,
         ),
       ),
@@ -101,11 +101,13 @@ class ExampleWidgetState extends State<ExampleWidget> with TickerProviderStateMi
   List<bool> _seatButtonsSelected;
   List<bool> _visibilities;
   bool _spinOrReset;
+  double _spinRadians;
+  final _rng = new Random();
 
   @override
   void initState() {
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
 
@@ -129,6 +131,26 @@ class ExampleWidgetState extends State<ExampleWidget> with TickerProviderStateMi
   void spin() {
     setState(() {
       _visibilities = _seatButtonsSelected;
+      List<int> activePositions = List<int>();
+
+      for(var i = 0 ; i < widget.numSeats; i++) {
+        if(_visibilities[i] == true){
+          activePositions.add(i);
+        }
+      }
+      if(activePositions.length == 0) {
+        for(var i = 0 ; i < widget.numSeats; i++) {
+          _visibilities[i] = true;
+          activePositions.add(i);
+        }
+      }
+
+      print("len = $activePositions.length");
+      var randomNum = _rng.nextInt((activePositions.length));
+      print("ran = $randomNum");
+      var winnerSeatPos = activePositions[randomNum];
+      var additionalSpins = _rng.nextInt(2);
+      _spinRadians = (1.0 * winnerSeatPos / widget.numSeats) + additionalSpins;
     });
     _controller.reset();
     _controller.forward();
@@ -153,7 +175,7 @@ class ExampleWidgetState extends State<ExampleWidget> with TickerProviderStateMi
             bigCircle,
             new Positioned(
               child: RotationTransition(
-                turns: Tween(begin: 0.0, end: 2.0).animate(_controller),
+                turns: Tween(begin: 0.0, end: _spinRadians).animate(_controller),
                 child: new SpinnerButton(onTap: () {
                   if (_spinOrReset) {
                     spin();
@@ -175,8 +197,8 @@ class ExampleWidgetState extends State<ExampleWidget> with TickerProviderStateMi
                     onTapCallback: (bool selected){ _seatButtonsSelected[i] = selected;},
                   ),
                 ),
-                top: sin(2.0 * pi * i.toDouble()/widget.numSeats.toDouble()) * 118 + 125,
-                left: cos(2.0 * pi * i.toDouble()/widget.numSeats.toDouble()) * 118 + 125,
+                top: sin(2.0 * pi * i.toDouble()/widget.numSeats.toDouble() - pi/2) * 118 + 127,
+                left: cos(2.0 * pi * i.toDouble()/widget.numSeats.toDouble() - pi/2) * 118 + 127,
               )
           ],
         ),
