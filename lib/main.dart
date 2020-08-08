@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
+import 'package:confetti/confetti.dart';
 
 void main() {
   runApp(
@@ -11,18 +12,19 @@ void main() {
 }
 
 class ExampleWidget extends StatefulWidget {
-  final numSeats = 10;
+  final numSeats = 12;
 
   @override
   ExampleWidgetState createState() => ExampleWidgetState();
 }
 
 class CircleButton extends StatefulWidget {
+  final int index;
   final Function(bool) onTapCallback;
   final IconData iconData;
   final Color initialColor;
 
-  CircleButton({this.onTapCallback, this.iconData, this.initialColor});
+  CircleButton({this.index, this.onTapCallback, this.iconData, this.initialColor});
 
   @override
   CircleButtonState createState() => CircleButtonState();
@@ -51,19 +53,26 @@ class CircleButtonState extends State<CircleButton> {
 
   @override
   Widget build(BuildContext context) {
-    double size = 45.0;
+    double size = 65.0;
     return new InkResponse(
       onTap: onTap,
       child: new Container(
         width: size,
         height: size,
-        decoration: new BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-        ),
-        child: new Icon(
-          widget.iconData,
-          color:_iconColor,
+        child: ColorFiltered(
+          colorFilter: _iconColor == Colors.red ? ColorFilter.mode(
+            Colors.transparent,
+            BlendMode.multiply,
+          ) : ColorFilter.matrix(<double>[
+            0.2126,0.7152,0.0722,0,0,
+            0.2126,0.7152,0.0722,0,0,
+            0.2126,0.7152,0.0722,0,0,
+            0,0,0,1,0,
+          ]),
+          child: Image.asset('assets/ManSitting' + widget.index.toString() + '.png',
+            height: 60,
+            width: 60,
+          ),
         ),
       ),
     );
@@ -78,21 +87,10 @@ class SpinnerButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new GestureDetector(
-      child: ColorFiltered(
-        colorFilter: false ? ColorFilter.mode(
-          Colors.transparent,
-          BlendMode.multiply,
-        ) : ColorFilter.matrix(<double>[
-          0.2126,0.7152,0.0722,0,0,
-          0.2126,0.7152,0.0722,0,0,
-          0.2126,0.7152,0.0722,0,0,
-          0,0,0,1,0,
-        ]),
-        child: Image.asset('assets/ManSitting1.png',
-          height: 60,
-          width: 60,
+       child: Image.asset('assets/wine.png',
+          height: 70,
+          width: 30,
         ),
-      ),
       onTap: onTap);
   }
 }
@@ -185,21 +183,22 @@ class ExampleWidgetState extends State<ExampleWidget> with TickerProviderStateMi
                   }
                 }),
               ),
-              top: 120.0,
-              left: 130.0,
+              top: 110.0,
+              left: 140.0,
             ),
             for ( var i = 0 ; i < widget.numSeats; i++ )
               Positioned (
                 child: Visibility (
                   visible: _visibilities[i],
                   child: new CircleButton (
-                  initialColor: Colors.black,
+                    index: i,
+                    initialColor: Colors.black,
                     iconData: Icons.golf_course,
                     onTapCallback: (bool selected){ _seatButtonsSelected[i] = selected;},
                   ),
                 ),
-                top: sin(2.0 * pi * i.toDouble()/widget.numSeats.toDouble() - pi/2) * 118 + 127,
-                left: cos(2.0 * pi * i.toDouble()/widget.numSeats.toDouble() - pi/2) * 118 + 127,
+                top: sin(2.0 * pi * i.toDouble()/widget.numSeats.toDouble() - pi/2) * 118 + 117,
+                left: cos(2.0 * pi * i.toDouble()/widget.numSeats.toDouble() - pi/2) * 118 + 117,
               )
           ],
         ),

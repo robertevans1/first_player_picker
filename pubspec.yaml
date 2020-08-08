@@ -29,8 +29,9 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.3
   english_words: ^3.1.5
-  flutter_circular_chart: ^0.1.0
+  #flutter_circular_chart: ^0.1.0
   flutter_phoenix: ^0.1.0
+  confetti: ^0.5.4
 
 dev_dependencies:
   flutter_test:
@@ -49,7 +50,19 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - assets/ManSitting0.png
     - assets/ManSitting1.png
+    - assets/ManSitting2.png
+    - assets/ManSitting3.png
+    - assets/ManSitting4.png
+    - assets/ManSitting5.png
+    - assets/ManSitting6.png
+    - assets/ManSitting7.png
+    - assets/ManSitting8.png
+    - assets/ManSitting9.png
+    - assets/ManSitting10.png
+    - assets/ManSitting11.png
+    - assets/wine.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
