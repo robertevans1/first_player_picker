@@ -77,22 +77,23 @@ class SpinnerButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double size = 45.0;
-    return new InkResponse(
-      onTap: onTap,
-      child: new Container(
-        width: size,
-        height: size,
-        decoration: new BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-        ),
-        child: new Icon(
-          Icons.arrow_upward,
-          color: Colors.blue,
+    return new GestureDetector(
+      child: ColorFiltered(
+        colorFilter: false ? ColorFilter.mode(
+          Colors.transparent,
+          BlendMode.multiply,
+        ) : ColorFilter.matrix(<double>[
+          0.2126,0.7152,0.0722,0,0,
+          0.2126,0.7152,0.0722,0,0,
+          0.2126,0.7152,0.0722,0,0,
+          0,0,0,1,0,
+        ]),
+        child: Image.asset('assets/ManSitting1.png',
+          height: 60,
+          width: 60,
         ),
       ),
-    );
+      onTap: onTap);
   }
 }
 
@@ -163,7 +164,7 @@ class ExampleWidgetState extends State<ExampleWidget> with TickerProviderStateMi
       width: 300.0,
       height: 300.0,
       decoration: new BoxDecoration(
-        color: Colors.orange,
+        color: Colors.white,
         shape: BoxShape.circle,
       ),
     );
