@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:confetti/confetti.dart';
+import 'dart:async';
 
 void main() {
   runApp(
@@ -40,11 +41,11 @@ class CircleButtonState extends State<CircleButton> {
     _iconColor = widget.initialColor;
     onTap = () {
       setState(() {
-        if(_iconColor == Colors.black) {
+        if(_iconColor == widget.initialColor) {
           _iconColor = Colors.red;
           widget.onTapCallback(true);
         } else {
-          _iconColor = Colors.black;
+          _iconColor = widget.initialColor;
           widget.onTapCallback(false);
         }
       });
@@ -69,10 +70,14 @@ class CircleButtonState extends State<CircleButton> {
             0.2126,0.7152,0.0722,0,0,
             0,0,0,1,0,
           ]),
-          child: Image.asset('assets/ManSitting' + widget.index.toString() + '.png',
+          child: _iconColor == Colors.red ? Image.asset('assets/ManSitting' + widget.index.toString() + '.png',
             height: 60,
             width: 60,
-          ),
+          ) :
+          Icon(
+            Icons.add_circle,
+            color: widget.initialColor,
+          )
         ),
       ),
     );
@@ -81,8 +86,9 @@ class CircleButtonState extends State<CircleButton> {
 
 class SpinnerButton extends StatelessWidget {
   final GestureTapCallback onTap;
+  Container container;
 
-  SpinnerButton({this.onTap});
+  SpinnerButton({this.onTap, this.container});
 
   @override
   Widget build(BuildContext context) {
@@ -97,6 +103,7 @@ class SpinnerButton extends StatelessWidget {
 
 class ExampleWidgetState extends State<ExampleWidget> with TickerProviderStateMixin {
   AnimationController _controller;
+  ConfettiController _controllerCenter;
   List<bool> _seatButtonsSelected;
   List<bool> _visibilities;
   bool _spinOrReset;
@@ -117,7 +124,7 @@ class ExampleWidgetState extends State<ExampleWidget> with TickerProviderStateMi
       _visibilities.add(true);
     }
     _spinOrReset = true;
-
+    _controllerCenter =  ConfettiController(duration: const Duration(seconds: 3));
     super.initState();
   }
 
@@ -127,7 +134,8 @@ class ExampleWidgetState extends State<ExampleWidget> with TickerProviderStateMi
     super.dispose();
   }
 
-  void spin() {
+  int spin() {
+    var winnerSeatPos = 0;
     setState(() {
       _visibilities = _seatButtonsSelected;
       List<int> activePositions = List<int>();
@@ -147,13 +155,21 @@ class ExampleWidgetState extends State<ExampleWidget> with TickerProviderStateMi
       print("len = $activePositions.length");
       var randomNum = _rng.nextInt((activePositions.length));
       print("ran = $randomNum");
-      var winnerSeatPos = activePositions[randomNum];
+      winnerSeatPos = activePositions[randomNum];
       var additionalSpins = _rng.nextInt(2);
       _spinRadians = (1.0 * winnerSeatPos / widget.numSeats) + additionalSpins;
     });
     _controller.reset();
     _controller.forward();
     _spinOrReset = false;
+    return winnerSeatPos;
+  }
+
+  void blast(int winnerSeat) {
+   Timer(
+        Duration(milliseconds: 800),
+            (){ _controllerCenter.play(); }
+    );
   }
 
   @override
@@ -172,34 +188,64 @@ class ExampleWidgetState extends State<ExampleWidget> with TickerProviderStateMi
         child: new Stack(
           children: <Widget>[
             bigCircle,
-            new Positioned(
-              child: RotationTransition(
-                turns: Tween(begin: 0.0, end: _spinRadians).animate(_controller),
-                child: new SpinnerButton(onTap: () {
-                  if (_spinOrReset) {
-                    spin();
-                  } else {
-                    Phoenix.rebirth(context);
-                  }
-                }),
-              ),
-              top: 110.0,
-              left: 140.0,
-            ),
             for ( var i = 0 ; i < widget.numSeats; i++ )
               Positioned (
                 child: Visibility (
                   visible: _visibilities[i],
                   child: new CircleButton (
                     index: i,
-                    initialColor: Colors.black,
-                    iconData: Icons.golf_course,
+                    initialColor: Colors.blue,
+                    iconData: Icons.add_circle,
                     onTapCallback: (bool selected){ _seatButtonsSelected[i] = selected;},
                   ),
                 ),
                 top: sin(2.0 * pi * i.toDouble()/widget.numSeats.toDouble() - pi/2) * 118 + 117,
                 left: cos(2.0 * pi * i.toDouble()/widget.numSeats.toDouble() - pi/2) * 118 + 117,
               )
+            ,
+            new Positioned(
+              child: RotationTransition (
+                turns: Tween(begin: 0.0, end: _spinRadians).animate(_controller),
+                child: new Stack(
+                  children: <Widget>[
+                    new SpinnerButton(
+                      onTap: () {
+                        if (_spinOrReset) {
+                          var winnerSeat = spin();
+                          blast(winnerSeat);
+                        } else {
+                          Phoenix.rebirth(context);
+                        }
+                      },
+                    ),
+                    new Positioned (
+                      child: new ConfettiWidget (
+                        confettiController: _controllerCenter,
+                        blastDirection: -pi/2, // radial value - LEFT
+                        particleDrag: 0.3, // apply drag to the confetti
+                        emissionFrequency: 0.05, // how often it should emit
+                        numberOfParticles: 20, // number of particles to emit
+                        gravity: 0.01, // gravity - or fall speed
+                        shouldLoop: false,
+                        minimumSize: const Size(1,1),
+                        maximumSize: const Size(10, 10),
+                        minBlastForce: 7,
+                        maxBlastForce: 8,
+                        colors: const [
+                          Colors.green,
+                          Colors.blue,
+                          Colors.pink
+                        ], // manually specify the colors to be used
+                      ),
+                      top: 0.0,
+                      left: 20.0,
+                    ),
+                  ],
+                ),
+              ),
+              top: 115.0,
+              left: 135.0,
+            ),
           ],
         ),
       ),
