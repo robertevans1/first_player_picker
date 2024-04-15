@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_phoenix/flutter_phoenix.dart';
 
-import 'StartupPickerWidget.dart';
+import 'startup_picker_widget.dart';
 
 void main() {
   runApp(
-      Phoenix(
-          child: new MaterialApp(home: new StartupPickerWidget()),
-      )
+    new MaterialApp(
+      home: new StartupPickerWidget(),
+    ),
   );
 }
-
